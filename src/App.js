@@ -1,6 +1,6 @@
 // Import React hooks and pitch detection algorithm
 import React, { useState, useRef } from 'react';
-import { AMDF } from 'pitchfinder';
+import { YIN } from 'pitchfinder'; // try YIN instead of AMDF
 
 function App() {
   // States for UI and data
@@ -53,11 +53,20 @@ function App() {
         setHealthTip("Huge range! Great job — just remember to pace yourself when stretching both ends.");
       }
 
-      // Set the vocal range for display
-      setVocalRange({
-        low: noteFromPitch(min),
-        high: noteFromPitch(max),
-      });
+      // Get note names
+      const lowNote = noteFromPitch(min);
+      const highNote = noteFromPitch(max);
+
+      if (!lowNote || !highNote) {
+        // Handle the error case—set fallback values, log an error, etc.
+        setVocalRange({ low: "N/A", high: "N/A" });
+      } else {
+        // Set the vocal range for display
+        setVocalRange({
+          low: lowNote,
+          high: highNote,
+        });
+      }
     };
 
     // Begin recording
@@ -77,24 +86,44 @@ function App() {
     const arrayBuffer = await blob.arrayBuffer();
     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
     const float32Array = audioBuffer.getChannelData(0);
+    // print length
+    console.log('Audio data length:', float32Array.length);
+    
+    const sampleRate = audioBuffer.sampleRate; // define, then call
+    console.log('Sample rate:', sampleRate); // now it works
 
-    const detectPitch = AMDF(); // use AMDF pitch detection
-    const sampleRate = audioBuffer.sampleRate;
-    const stepSize = 1024;
+    const detectPitch = YIN(); // use YIN/AMDF pitch detection
+    const stepSize = 512; // try smaller step size
     const pitches = [];
 
     // Loop through audio chunks to find pitch
     for (let i = 0; i < float32Array.length; i += stepSize) {
       const chunk = float32Array.slice(i, i + stepSize);
       const pitch = detectPitch(chunk, sampleRate);
-      if (pitch) pitches.push(pitch);
+      console.log(`Chunk ${i} - Pitch:`, pitch);
+      if (pitch) {
+        pitches.push(pitch);
+      }
     }
+    
+    console.log('Raw pitches:', pitches);
+    // Filter out any invalid pitches
+    const validPitches = pitches.filter(f => f && f > 0);
+    if (validPitches.length === 0) {
+      console.log('No valid pitches detected.');
+      return [];
+    }
+  
+    console.log('Valid pitches:', validPitches);
+    return validPitches;
 
-    return pitches;
   };
 
   // Convert frequency to readable note name (e.g., C4, A5)
   const noteFromPitch = (frequency) => {
+    if (!frequency || frequency <= 0) {
+      return null; 
+    }
     const A4 = 440;
     const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
     const semitonesFromA4 = 12 * Math.log2(frequency / A4);
