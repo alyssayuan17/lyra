@@ -28,6 +28,11 @@ function App() {
       // Convert recorded chunks into a usable Blob and generate a playback URL
       const blob = new Blob(chunks.current, { type: 'audio/webm' });
       const url = URL.createObjectURL(blob);
+
+      // Find lowest and highest pitch values detected
+      const min = Math.min(...pitches);
+      const max = Math.max(...pitches);
+
       const getMidi = (freq) => Math.round(69 + 12 * Math.log2(freq / 440));
 
       // Convert min/max pitch to MIDI numbers
@@ -52,10 +57,6 @@ function App() {
       // Analyze the pitch data from the recorded audio
       const pitches = await detectPitchesFromBlob(blob);
       if (pitches.length === 0) return;
-
-      // Find lowest and highest pitch values detected
-      const min = Math.min(...pitches);
-      const max = Math.max(...pitches);
 
       // Convert pitch frequencies into musical notes
       setVocalRange({
@@ -139,21 +140,12 @@ function App() {
           <p className="text-2xl text-indigo-700 font-bold mt-1">
             {vocalRange.low} – {vocalRange.high}
           </p>
-          {vocalRange && (
-            <div className="mt-6 text-center">
-              <p className="text-lg font-semibold text-gray-800">Your Vocal Range:</p>
-              <p className="text-2xl text-indigo-700 font-bold mt-1">
-                {vocalRange.low} – {vocalRange.high}
-              </p>
-
-              {/* 🎯 Vocal health tip */}
-              {healthTip && (
-                <div className="mt-4 text-center max-w-md bg-yellow-100 border border-yellow-300 p-4 rounded shadow-sm mx-auto">
-                  <p className="text-yellow-800 font-medium">{healthTip}</p>
-                </div>
-              )}
-            </div>
-          )}
+            {/* Vocal health tip */}
+            {healthTip && (
+              <div className="mt-4 text-center max-w-md bg-yellow-100 border border-yellow-300 p-4 rounded shadow-sm mx-auto">
+                <p className="text-yellow-800 font-medium">{healthTip}</p>
+              </div>
+            )}
         </div>
       )}
     </div>
