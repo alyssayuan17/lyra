@@ -98,11 +98,10 @@ function App() {
     const A4 = 440;
     const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
     const semitonesFromA4 = 12 * Math.log2(frequency / A4);
-    const noteIndex = Math.round(semitonesFromA4) + 57; // MIDI note index
-    const octave = Math.floor(noteIndex / 12);
-    const noteName = noteNames[noteIndex % 12];
-    return `${noteName}${octave}`;
-  };
+    const noteIndex = Math.round(semitonesFromA4) % 12;
+    const octave = 4 + Math.floor((Math.round(semitonesFromA4) + 9) / 12);
+    return noteNames[noteIndex] + octave;
+  };  
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-100 to-white flex flex-col items-center justify-center p-6">
