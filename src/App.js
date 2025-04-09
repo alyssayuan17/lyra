@@ -35,13 +35,18 @@ function App() {
     // When recording stops, analyze audio
     mediaRecorderRef.current.onstop = async () => {
       const blob = new Blob(chunks.current, { type: 'audio/webm' });
-      const url = URL.createObjectURL(blob);
-      setAudioURL(url);
       chunks.current = [];
+
+      const url = URL.createObjectURL(blob);
+      setAudioURL(url); 
 
       // Detect pitch values from the audio
       const pitches = await detectPitchesFromBlob(blob);
-      if (pitches.length === 0) return;
+      if (pitches.length === 0) {
+        setVocalRange({ low: "N/A", high: "N/A" });
+        setHealthTip("We couldn't detect a clear pitch. Try singing a longer or more sustained tone.");
+        return;
+      }
 
       // Use percentiles to determine a more robust vocal range
       const sortedPitches = pitches.slice().sort((a, b) => a - b);
@@ -49,18 +54,14 @@ function App() {
       const highIndex = Math.floor(sortedPitches.length * 0.9);
       const robustMin = sortedPitches[lowIndex];
       const robustMax = sortedPitches[highIndex];
-      
-      // Find the lowest and highest pitch
-      const min = Math.min(...pitches);
-      const max = Math.max(...pitches);
 
       // Convert pitch to MIDI to determine vocal strain
       const getMidi = (freq) => Math.round(69 + 12 * Math.log2(freq / 440));
-      const midiMin = getMidi(min);
-      const midiMax = getMidi(max);
+      const midiMin = getMidi(robustMin);
+      const midiMax = getMidi(robustMax);
 
       // Show helpful health tip based on range
-      setHealthTip('');
+      let tip = "";
       if (midiMax >= 84) {
         setHealthTip("Wow, you hit a really high note! Make sure to warm up and don’t strain your upper range.");
       } else if (midiMin <= 48) {
@@ -69,19 +70,15 @@ function App() {
         setHealthTip("Huge range! Great job — just remember to pace yourself when stretching both ends.");
       }
 
+      setHealthTip(tip);
+
       // Get note names using the robust measurements
       const lowNote = noteFromPitch(robustMin);
       const highNote = noteFromPitch(robustMax);
-
-      if (!lowNote || !highNote) { // In case neither return true
-        // Handle the error case—set fallback values, log an error, etc.
+      if (!lowNote || !highNote) {
         setVocalRange({ low: "N/A", high: "N/A" });
       } else {
-        // Set the vocal range for display
-        setVocalRange({
-          low: lowNote,
-          high: highNote,
-        });
+        setVocalRange({ low: lowNote, high: highNote });
       }
     };
 
@@ -102,70 +99,55 @@ function App() {
     const arrayBuffer = await blob.arrayBuffer();
     let audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
-    // --- apply a high-frequency low-pass filter using OfflineAudioContext ---
-    // create an offline context matching the decoded audio
-    const offlineContext = new OfflineAudioContext(
+    // apply a high-frequency low-pass filter using OfflineAudioContext
+    const offlineContext = new OfflineAudioContext( // create an offline context matching the decoded audio
       audioBuffer.numberOfChannels,
       audioBuffer.length,
       audioBuffer.sampleRate
     );
 
-    // Create a source from the original buffer
     const source = offlineContext.createBufferSource();
     source.buffer = audioBuffer;
 
-    // Create a BiquadFilter and set it as a low-pass filter
     const lowPassFilter = offlineContext.createBiquadFilter();
     lowPassFilter.type = 'lowpass';
     lowPassFilter.frequency.value = 2000; // Filter frequencies above 2000 Hz
 
-    // Connect the nodes: source -> filter -> destination
     source.connect(lowPassFilter);
     lowPassFilter.connect(offlineContext.destination);
 
-    // Start processing and render the filtered audio
     source.start();
     audioBuffer = await offlineContext.startRendering();
+    // ---------------------------------------------------------------
 
-    // ----------------------------------------------------
-
-    // Extract channel data from the filtered audioBuffer
-    const float32Array = audioBuffer.getChannelData(0);
-    // print length
+    const float32Array = audioBuffer.getChannelData(0); // extract channel data from the filtered audioBuffer
     console.log('Filtered audio data length:', float32Array.length);
-    
-    const sampleRate = audioBuffer.sampleRate; // define, then call
-    console.log('Sample rate:', sampleRate); // now it works
+    const sampleRate = audioBuffer.sampleRate;
+    console.log('Sample rate:', sampleRate);
 
     const detectPitch = YIN(); // use YIN/AMDF pitch detection
     const stepSize = 512; // try smaller step size
     const pitches = [];
 
-    // computing RMS per chunk
-    const computeRMS = (chunk) => {
-      const sumSquares = chunk.reduce((sum, sample) => sum + sample * sample, 0);
-      return Math.sqrt(sumSquares / chunk.length);
-    };
-    const ENERGY_THRESHOLD = 0.02;
-
-    // Loop through audio chunks to find pitch
     for (let i = 0; i < float32Array.length; i += stepSize) {
       const chunk = float32Array.slice(i, i + stepSize);
-      const rms = computeRMS(chunk); // Compute the RMS energy of the current chunk
-      if (rms < ENERGY_THRESHOLD) { // Skip chunks with low energy (likely unvoiced)
+      const rms = computeRMS(chunk);
+      if (rms < ENERGY_THRESHOLD) {
         continue;
       }
       const pitch = detectPitch(chunk, sampleRate);
-      console.log(`Chunk ${i} - RMS: ${rms.toFixed(3)} - Pitch:`, pitch);
-      if (pitch) {
-        pitches.push(pitch);
-      }
+      console.log(`Chunk ${i} - RMS: ${rms.toFixed(3)} - Pitch: ${pitch}`);
+      // You can re-enable clamping here after confirming pitch values:
+      // if (pitch > 1500 || pitch < 50) {
+      //   console.log(`Discarding implausible pitch: ${pitch} Hz`);
+      //   continue;
+      // }
+      pitches.push(pitch);
     }
     
     console.log('Raw detected pitches:', pitches);
 
-    // Filter out any invalid pitches
-    const validPitches = pitches.filter(f => f && f > 0);
+    const validPitches = pitches.filter(f => f && f > 0); // filter out invalid pitches
     if (validPitches.length === 0) {
       console.log('No valid pitches detected.');
       return [];
@@ -173,7 +155,6 @@ function App() {
   
     console.log('Valid pitches:', validPitches);
     return validPitches;
-
   };
 
   // Convert frequency to readable note name (e.g., C4, A5)
