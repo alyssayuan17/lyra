@@ -13,6 +13,15 @@ function App() {
   const mediaRecorderRef = useRef(null);
   const chunks = useRef([]);
 
+  // Energy threshold for voiced segments (adjust as needed)
+  const ENERGY_THRESHOLD = 0.02;
+
+  // Helper function to compute RMS energy of a chunk
+  const computeRMS = (chunk) => {
+    const sumSquares = chunk.reduce((sum, sample) => sum + sample * sample, 0);
+    return Math.sqrt(sumSquares / chunk.length);
+  };
+
   // Start mic recording
   const startRecording = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -34,6 +43,13 @@ function App() {
       const pitches = await detectPitchesFromBlob(blob);
       if (pitches.length === 0) return;
 
+      // Use percentiles to determine a more robust vocal range
+      const sortedPitches = pitches.slice().sort((a, b) => a - b);
+      const lowIndex = Math.floor(sortedPitches.length * 0.1);
+      const highIndex = Math.floor(sortedPitches.length * 0.9);
+      const robustMin = sortedPitches[lowIndex];
+      const robustMax = sortedPitches[highIndex];
+      
       // Find the lowest and highest pitch
       const min = Math.min(...pitches);
       const max = Math.max(...pitches);
@@ -53,11 +69,11 @@ function App() {
         setHealthTip("Huge range! Great job — just remember to pace yourself when stretching both ends.");
       }
 
-      // Get note names
-      const lowNote = noteFromPitch(min);
-      const highNote = noteFromPitch(max);
+      // Get note names using the robust measurements
+      const lowNote = noteFromPitch(robustMin);
+      const highNote = noteFromPitch(robustMax);
 
-      if (!lowNote || !highNote) {
+      if (!lowNote || !highNote) { // In case neither return true
         // Handle the error case—set fallback values, log an error, etc.
         setVocalRange({ low: "N/A", high: "N/A" });
       } else {
@@ -99,14 +115,19 @@ function App() {
     // Loop through audio chunks to find pitch
     for (let i = 0; i < float32Array.length; i += stepSize) {
       const chunk = float32Array.slice(i, i + stepSize);
+      const rms = computeRMS(chunk); // Compute the RMS energy of the current chunk
+      if (rms < ENERGY_THRESHOLD) { // Skip chunks with low energy (likely unvoiced)
+        continue;
+      }
       const pitch = detectPitch(chunk, sampleRate);
-      console.log(`Chunk ${i} - Pitch:`, pitch);
+      console.log(`Chunk ${i} - RMS: ${rms.toFixed(3)} - Pitch:`, pitch);
       if (pitch) {
         pitches.push(pitch);
       }
     }
     
-    console.log('Raw pitches:', pitches);
+    console.log('Raw detected pitches:', pitches);
+    
     // Filter out any invalid pitches
     const validPitches = pitches.filter(f => f && f > 0);
     if (validPitches.length === 0) {
