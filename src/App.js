@@ -13,8 +13,14 @@ function App() {
   const mediaRecorderRef = useRef(null);
   const chunks = useRef([]);
 
+  // Refs for realtime pitch detection
+  const audioContextRef = useRef(null);
+  const processorRef = useRef(null);
+  const sourceRef = useRef(null);
+  const detectedPitchesRef = useRef([]); // ✅ Use this instead of ._pitches
+
   // Energy threshold for voiced segments (adjust as needed)
-  const ENERGY_THRESHOLD = 0.02;
+  const ENERGY_THRESHOLD = 0.005;
 
   // Helper function to compute RMS energy of a chunk
   const computeRMS = (chunk) => {
@@ -25,150 +31,120 @@ function App() {
   // Start mic recording
   const startRecording = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    mediaRecorderRef.current = new MediaRecorder(stream);
 
-    // Push audio chunks as they come in
+    // Start media recording for audio playback
+    mediaRecorderRef.current = new MediaRecorder(stream);
     mediaRecorderRef.current.ondataavailable = (e) => {
       chunks.current.push(e.data);
     };
-
-    // When recording stops, analyze audio
-    mediaRecorderRef.current.onstop = async () => {
+    mediaRecorderRef.current.onstop = () => {
       const blob = new Blob(chunks.current, { type: 'audio/webm' });
       chunks.current = [];
-
       const url = URL.createObjectURL(blob);
-      setAudioURL(url); 
+      setAudioURL(url);
+    };
+    mediaRecorderRef.current.start();
 
-      // Detect pitch values from the audio
-      const pitches = await detectPitchesFromBlob(blob);
-      if (pitches.length === 0) {
-        setVocalRange({ low: "N/A", high: "N/A" });
-        setHealthTip("We couldn't detect a clear pitch. Try singing a longer or more sustained tone.");
-        return;
-      }
+    // Start live pitch detection
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioContext.createMediaStreamSource(stream);
+    const processor = audioContext.createScriptProcessor(2048, 1, 1);
+    const detect = YIN();
+    const sampleRate = audioContext.sampleRate;
 
-      // Use percentiles to determine a more robust vocal range
-      const sortedPitches = pitches.slice().sort((a, b) => a - b);
-      const lowIndex = Math.floor(sortedPitches.length * 0.1);
-      const highIndex = Math.floor(sortedPitches.length * 0.9);
-      const robustMin = sortedPitches[lowIndex];
-      const robustMax = sortedPitches[highIndex];
+    detectedPitchesRef.current = []; // Reset pitch store
 
-      // Convert pitch to MIDI to determine vocal strain
-      const getMidi = (freq) => Math.round(69 + 12 * Math.log2(freq / 440));
-      const midiMin = getMidi(robustMin);
-      const midiMax = getMidi(robustMax);
+    processor.onaudioprocess = (event) => {
+      const input = event.inputBuffer.getChannelData(0);
+      const rms = computeRMS(input);
 
-      // Show helpful health tip based on range
-      let tip = "";
-      if (midiMax >= 84) {
-        setHealthTip("Wow, you hit a really high note! Make sure to warm up and don’t strain your upper range.");
-      } else if (midiMin <= 48) {
-        setHealthTip("You sang super low! Make sure you're not forcing your chest voice — support with proper breath.");
-      } else if (midiMax - midiMin > 24) {
-        setHealthTip("Huge range! Great job — just remember to pace yourself when stretching both ends.");
-      }
+      if (rms < ENERGY_THRESHOLD) return;
 
-      setHealthTip(tip);
-
-      // Get note names using the robust measurements
-      const lowNote = noteFromPitch(robustMin);
-      const highNote = noteFromPitch(robustMax);
-      if (!lowNote || !highNote) {
-        setVocalRange({ low: "N/A", high: "N/A" });
-      } else {
-        setVocalRange({ low: lowNote, high: highNote });
+      const pitch = detect(input, sampleRate);
+      if (pitch && pitch > 65 && pitch < 1200) {
+        detectedPitchesRef.current.push(pitch);
+        console.log("Detected pitch:", pitch);
       }
     };
 
-    // Begin recording
-    mediaRecorderRef.current.start();
+    source.connect(processor);
+    processor.connect(audioContext.destination);
+
+    // Save nodes for cleanup later
+    audioContextRef.current = audioContext;
+    sourceRef.current = source;
+    processorRef.current = processor;
+
     setIsRecording(true);
   };
 
   // Stop recording when button is clicked
   const stopRecording = () => {
-    mediaRecorderRef.current.stop();
+    mediaRecorderRef.current?.stop();
     setIsRecording(false);
-  };
 
-  // Convert recorded audio blob → array of pitch values
-  const detectPitchesFromBlob = async (blob) => {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const arrayBuffer = await blob.arrayBuffer();
-    let audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-
-    // apply a high-frequency low-pass filter using OfflineAudioContext
-    const offlineContext = new OfflineAudioContext( // create an offline context matching the decoded audio
-      audioBuffer.numberOfChannels,
-      audioBuffer.length,
-      audioBuffer.sampleRate
-    );
-
-    const source = offlineContext.createBufferSource();
-    source.buffer = audioBuffer;
-
-    const lowPassFilter = offlineContext.createBiquadFilter();
-    lowPassFilter.type = 'lowpass';
-    lowPassFilter.frequency.value = 2000; // Filter frequencies above 2000 Hz
-
-    source.connect(lowPassFilter);
-    lowPassFilter.connect(offlineContext.destination);
-
-    source.start();
-    audioBuffer = await offlineContext.startRendering();
-    // ---------------------------------------------------------------
-
-    const float32Array = audioBuffer.getChannelData(0); // extract channel data from the filtered audioBuffer
-    console.log('Filtered audio data length:', float32Array.length);
-    const sampleRate = audioBuffer.sampleRate;
-    console.log('Sample rate:', sampleRate);
-
-    const detectPitch = YIN(); // use YIN/AMDF pitch detection
-    const stepSize = 512; // try smaller step size
-    const pitches = [];
-
-    for (let i = 0; i < float32Array.length; i += stepSize) {
-      const chunk = float32Array.slice(i, i + stepSize);
-      const rms = computeRMS(chunk);
-      if (rms < ENERGY_THRESHOLD) {
-        continue;
-      }
-      const pitch = detectPitch(chunk, sampleRate);
-      console.log(`Chunk ${i} - RMS: ${rms.toFixed(3)} - Pitch: ${pitch}`);
-      // You can re-enable clamping here after confirming pitch values:
-      // if (pitch > 1500 || pitch < 50) {
-      //   console.log(`Discarding implausible pitch: ${pitch} Hz`);
-      //   continue;
-      // }
-      pitches.push(pitch);
+    // Safely disconnect realtime audio nodes
+    try {
+      processorRef.current?.disconnect();
+      sourceRef.current?.disconnect();
+      audioContextRef.current?.close();
+    } catch (e) {
+      console.warn("Audio node cleanup failed:", e);
     }
-    
-    console.log('Raw detected pitches:', pitches);
 
-    const validPitches = pitches.filter(f => f && f > 0); // filter out invalid pitches
-    if (validPitches.length === 0) {
-      console.log('No valid pitches detected.');
-      return [];
+    const pitches = detectedPitchesRef.current || [];
+    console.log("Final captured valid pitches:", pitches);
+
+    if (pitches.length === 0) {
+      setVocalRange({ low: "N/A", high: "N/A" });
+      setHealthTip("We couldn't detect a clear pitch. Try singing a longer or more sustained tone.");
+      return;
     }
-  
-    console.log('Valid pitches:', validPitches);
-    return validPitches;
+
+    // Process vocal range from valid pitches
+    const sortedPitches = pitches.slice().sort((a, b) => a - b);
+    const lowIndex = Math.floor(sortedPitches.length * 0.1);
+    const highIndex = Math.floor(sortedPitches.length * 0.9);
+    const robustMin = sortedPitches[lowIndex];
+    const robustMax = sortedPitches[highIndex];
+
+    const getMidi = (freq) => Math.round(69 + 12 * Math.log2(freq / 440));
+    const midiMin = getMidi(robustMin);
+    const midiMax = getMidi(robustMax);
+
+    // Show helpful health tip based on range
+    let tip = "";
+    if (midiMax >= 84) {
+      tip = "Wow, you hit a really high note! Make sure to warm up and don’t strain your upper range.";
+    } else if (midiMin <= 48) {
+      tip = "You sang super low! Make sure you're not forcing your chest voice — support with proper breath.";
+    } else if (midiMax - midiMin > 24) {
+      tip = "Huge range! Great job — just remember to pace yourself when stretching both ends.";
+    }
+    setHealthTip(tip);
+
+    // Get note names using the robust measurements
+    const lowNote = noteFromPitch(robustMin);
+    const highNote = noteFromPitch(robustMax);
+    if (!lowNote || !highNote) {
+      setVocalRange({ low: "N/A", high: "N/A" });
+    } else {
+      setVocalRange({ low: lowNote, high: highNote });
+    }
   };
 
   // Convert frequency to readable note name (e.g., C4, A5)
   const noteFromPitch = (frequency) => {
     if (!frequency || frequency <= 0) {
-      return null; 
+      return null;
     }
     const A4 = 440;
     const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
     const semitonesFromA4 = 12 * Math.log2(frequency / A4);
-    const noteIndex = Math.round(semitonesFromA4) % 12;
+    const noteIndex = ((Math.round(semitonesFromA4) % 12) + 12) % 12;
     const octave = 4 + Math.floor((Math.round(semitonesFromA4) + 9) / 12);
     return noteNames[noteIndex] + octave;
-  };  
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-100 to-white flex flex-col items-center justify-center p-6">
