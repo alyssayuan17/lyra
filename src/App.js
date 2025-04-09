@@ -100,10 +100,39 @@ function App() {
   const detectPitchesFromBlob = async (blob) => {
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     const arrayBuffer = await blob.arrayBuffer();
-    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    let audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+    // --- apply a high-frequency low-pass filter using OfflineAudioContext ---
+    // create an offline context matching the decoded audio
+    const offlineContext = new OfflineAudioContext(
+      audioBuffer.numberOfChannels,
+      audioBuffer.length,
+      audioBuffer.sampleRate
+    );
+
+    // Create a source from the original buffer
+    const source = offlineContext.createBufferSource();
+    source.buffer = audioBuffer;
+
+    // Create a BiquadFilter and set it as a low-pass filter
+    const lowPassFilter = offlineContext.createBiquadFilter();
+    lowPassFilter.type = 'lowpass';
+    lowPassFilter.frequency.value = 2000; // Filter frequencies above 2000 Hz
+
+    // Connect the nodes: source -> filter -> destination
+    source.connect(lowPassFilter);
+    lowPassFilter.connect(offlineContext.destination);
+
+    // Start processing and render the filtered audio
+    source.start();
+    audioBuffer = await offlineContext.startRendering();
+
+    // ----------------------------------------------------
+
+    // Extract channel data from the filtered audioBuffer
     const float32Array = audioBuffer.getChannelData(0);
     // print length
-    console.log('Audio data length:', float32Array.length);
+    console.log('Filtered audio data length:', float32Array.length);
     
     const sampleRate = audioBuffer.sampleRate; // define, then call
     console.log('Sample rate:', sampleRate); // now it works
@@ -111,6 +140,13 @@ function App() {
     const detectPitch = YIN(); // use YIN/AMDF pitch detection
     const stepSize = 512; // try smaller step size
     const pitches = [];
+
+    // computing RMS per chunk
+    const computeRMS = (chunk) => {
+      const sumSquares = chunk.reduce((sum, sample) => sum + sample * sample, 0);
+      return Math.sqrt(sumSquares / chunk.length);
+    };
+    const ENERGY_THRESHOLD = 0.02;
 
     // Loop through audio chunks to find pitch
     for (let i = 0; i < float32Array.length; i += stepSize) {
@@ -127,7 +163,7 @@ function App() {
     }
     
     console.log('Raw detected pitches:', pitches);
-    
+
     // Filter out any invalid pitches
     const validPitches = pitches.filter(f => f && f > 0);
     if (validPitches.length === 0) {
