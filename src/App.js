@@ -147,48 +147,63 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-indigo-100 to-white flex flex-col items-center justify-center p-6">
-      <h1 className="text-3xl font-extrabold text-indigo-800 mb-6">Lyra 🎙️</h1>
+    <div className="min-h-screen bg-gradient-to-b from-indigo-100 to-white flex flex-col items-center justify-center px-6 py-12">
+    {/* App Title */}
+    <h1 className="text-4xl sm:text-5xl font-extrabold text-indigo-800 mb-8 tracking-tight drop-shadow">
+      Lyra <span role="img" aria-label="mic">🎙️</span>
+    </h1>
 
-      {/* Start / Stop recording button */}
-      <div className="flex gap-4">
-        {isRecording ? (
-          <button onClick={stopRecording} className="bg-red-500 text-white px-4 py-2 rounded">
-            Stop Recording
-          </button>
-        ) : (
-          <button onClick={startRecording} className="bg-indigo-500 text-white px-4 py-2 rounded">
-            Start Recording
-          </button>
-        )}
-      </div>
-
-      {/* Playback audio once recorded */}
-      {audioURL && (
-        <div className="mt-6">
-          <audio controls src={audioURL} className="w-full max-w-sm" />
-          <a href={audioURL} download="recording.webm" className="mt-2 inline-block bg-green-500 text-white px-4 py-2 rounded">
-            Download Recording
-          </a>
-        </div>
-      )}
-
-      {/* Display vocal range + health tip */}
-      {vocalRange && (
-        <div className="mt-6 text-center">
-          <p className="text-lg font-semibold text-gray-800">Your Vocal Range:</p>
-          <p className="text-2xl text-indigo-700 font-bold mt-1">
-            {vocalRange.low} – {vocalRange.high}
-          </p>
-
-          {healthTip && (
-            <div className="mt-4 text-center max-w-md bg-yellow-100 border border-yellow-300 p-4 rounded shadow-sm mx-auto">
-              <p className="text-yellow-800 font-medium">{healthTip}</p>
-            </div>
-          )}
-        </div>
+    {/* Start / Stop Button */}
+    <div className="flex gap-4">
+      {isRecording ? (
+        <button
+          onClick={stopRecording}
+          className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-xl shadow-md transition"
+        >
+          Stop Recording
+        </button>
+      ) : (
+        <button
+          onClick={startRecording}
+          className="bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-3 rounded-xl shadow-md transition"
+        >
+          Start Recording
+        </button>
       )}
     </div>
+
+    {/* Playback + Download */}
+    {audioURL && (
+      <div className="mt-8 w-full max-w-md text-center space-y-3">
+        <audio controls src={audioURL} className="w-full rounded border" />
+        <a
+          href={audioURL}
+          download="recording.webm"
+          className="inline-block bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg shadow transition"
+        >
+          Download Recording
+        </a>
+      </div>
+    )}
+
+    {/* Vocal Range + Health Tip */}
+    {vocalRange && (
+      <div className="mt-10 text-center space-y-4">
+        <div>
+          <p className="text-lg font-semibold text-gray-700">Your Vocal Range:</p>
+          <p className="text-3xl font-bold text-indigo-700">
+            {vocalRange.low} – {vocalRange.high}
+          </p>
+        </div>
+
+        {healthTip && (
+          <div className="bg-yellow-100 text-yellow-900 border border-yellow-300 px-5 py-4 rounded-lg max-w-md mx-auto shadow-sm">
+            <p className="text-sm font-medium">{healthTip}</p>
+          </div>
+        )}
+      </div>
+    )}
+  </div>
   );
 }
 
