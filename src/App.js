@@ -38,7 +38,7 @@ function App() {
       chunks.current.push(e.data);
     };
     mediaRecorderRef.current.onstop = () => {
-      const blob = new Blob(chunks.current, { type: 'audio/webm' });
+      const blob = new Blob(chunks.current, { type: 'audio/webm' }); // this blob represents entire recording
       chunks.current = [];
       const url = URL.createObjectURL(blob);
       setAudioURL(url);
@@ -167,6 +167,9 @@ function App() {
       {audioURL && (
         <div className="mt-6">
           <audio controls src={audioURL} className="w-full max-w-sm" />
+          <a href={audioURL} download="recording.webm" className="mt-2 inline-block bg-green-500 text-white px-4 py-2 rounded">
+            Download Recording
+          </a>
         </div>
       )}
 
