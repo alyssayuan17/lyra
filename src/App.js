@@ -53,11 +53,29 @@ function App() {
     });
   };
 
+  const rangeToTag = (vocalRange) => { // mapping: match the user’s range to a tagged song category
+    const { low, high } = vocalRange;
+  
+    if (!low || !high) return "general vocal";
+  
+    if (low.startsWith("C3") && high.startsWith("G4")) {
+      return "deep alto vocal";
+    } else if (low.startsWith("A3") && high.startsWith("E5")) {
+      return "belting female vocal";
+    } else if (high.startsWith("A5") || high.startsWith("B5")) {
+      return "soprano arias";
+    }
+  
+    return "vocal warm up"; // if none matches, return this
+  };  
+
   useEffect(() => {
     const fetchSpotifySongs = async () => {
       const token = await getAccessToken();
-      const results = await searchSongs("soprano arias", token);
+      const tag = rangeToTag(vocalRange); // use range mapping in function
+      const results = await searchSongs(tag, token);
       setRecommended(results);
+
     };
   
     fetchSpotifySongs();
