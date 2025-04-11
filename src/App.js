@@ -56,7 +56,7 @@ function App() {
   useEffect(() => {
     const fetchSpotifySongs = async () => {
       const token = await getAccessToken();
-      const results = await searchSongs("belting female vocal", token);
+      const results = await searchSongs("soprano arias", token);
       setRecommended(results);
     };
   
