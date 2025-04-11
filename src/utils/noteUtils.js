@@ -6,5 +6,4 @@ export const noteFromPitch = (frequency) => {
     const noteIndex = ((Math.round(semitonesFromA4) % 12) + 12) % 12;
     const octave = 4 + Math.floor((Math.round(semitonesFromA4) + 9) / 12);
     return noteNames[noteIndex] + octave;
-  };
-  
+};

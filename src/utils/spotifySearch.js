@@ -7,8 +7,6 @@ export const searchSongs = async (query, accessToken) => {
         },
       }
     );
-  
     const data = await res.json();
     return data.tracks?.items || [];
-};
-  
+}

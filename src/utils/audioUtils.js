@@ -4,4 +4,3 @@ export const computeRMS = (chunk) => {
   };
   
   export const getMidi = (freq) => Math.round(69 + 12 * Math.log2(freq / 440));
-  
