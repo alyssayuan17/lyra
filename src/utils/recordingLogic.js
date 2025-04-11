@@ -67,7 +67,7 @@ export const stopRecording = async ({
   setIsRecording,
   setVocalRange,
   setHealthTip,
-  setRecommendedSongs,
+  setRecommended,
 }) => {
   mediaRecorderRef.current?.stop();
   setIsRecording(false);
@@ -110,5 +110,5 @@ export const stopRecording = async ({
 
   const token = await getAccessToken();
   const results = await searchSongs("pop female vocal", token);
-  setRecommendedSongs(results);
+  setRecommended(results);
 };

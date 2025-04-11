@@ -54,6 +54,10 @@ function App() {
   };
 
   const rangeToTag = (vocalRange) => { // mapping: match the user’s range to a tagged song category
+    if (!vocalRange || !vocalRange.low || !vocalRange.high) { // check if it is null, check if low/high is missing
+      return "general vocal";
+    }
+    
     const { low, high } = vocalRange;
   
     if (!low || !high) return "general vocal";
