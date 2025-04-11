@@ -1,0 +1,40 @@
+Start with:
+  - Recording is OFF
+  - No audio saved
+  - No vocal range shown
+  - No health tip shown
+
+Function to Start Recording:
+  - Turn ON microphone
+  - Begin recording audio
+  - Begin checking sound to find pitch (note)
+  - For each sound:
+      - If it's too quiet, ignore it
+      - If it's a clear pitch, save it
+
+Function to Stop Recording:
+  - Stop recording audio
+  - Stop checking sound
+  - If no pitches were found:
+      - Show message: “Try singing again”
+      - Don’t show a vocal range
+  - If pitches were found:
+      - Sort the pitches from low to high
+      - Pick lowest and highest strong pitches
+      - Figure out which musical notes they are
+      - Show your vocal range (like “C3 – G5”)
+      - Give a health tip based on how high/low you sang
+
+Function to Convert Pitch to Note:
+  - Turn frequency into musical note name (like A4)
+
+On the Screen:
+  - Show app name
+  - Show “Start” button if not recording
+  - Show “Stop” button if recording
+  - If audio is saved, show:
+      - Audio player
+      - Download button
+  - If vocal range is ready, show:
+      - Your low and high notes
+      - Helpful singing tip
