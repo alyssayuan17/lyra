@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import RecordingControls from './components/RecordingControls';
 import PlaybackPanel from './components/PlaybackPanel';
 import HealthTip from './components/HealthTip';
+import GenreSelect from './components/GenreSelect';
 import { startRecording, stopRecording } from "./utils/recordingLogic";
 
 import { computeRMS, getMidi } from './utils/audioUtils';
@@ -24,6 +25,7 @@ function App() {
   const processorRef = useRef(null);
   const sourceRef = useRef(null);
   const detectedPitchesRef = useRef([]);
+  const [selectedGenre, setSelectedGenre] = useState('');
 
   const handleStart = () => {
     startRecording({
@@ -77,13 +79,14 @@ function App() {
     const fetchSpotifySongs = async () => {
       const token = await getAccessToken();
       const tag = rangeToTag(vocalRange); // use range mapping in function
-      const results = await searchSongs(tag, token);
+      const query = `${tag} ${selectedGenre}`.trim();
+      const results = await searchSongs(query, token);
       setRecommended(results);
 
     };
   
     fetchSpotifySongs();
-  }, []);  
+  }, [vocalRange, selectedGenre]);  
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-100 to-white flex flex-col items-center justify-center px-6 py-12">
@@ -98,6 +101,8 @@ function App() {
       />
 
       <PlaybackPanel audioURL={audioURL} />
+
+      <GenreSelect value={selectedGenre} onChange={setSelectedGenre} />
 
       {vocalRange && (
         <div className="mt-10 text-center space-y-4">
