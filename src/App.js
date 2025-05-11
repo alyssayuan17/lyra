@@ -9,6 +9,8 @@ import { computeRMS, getMidi } from './utils/audioUtils';
 import { noteFromPitch } from './utils/noteUtils';
 import { getAccessToken } from './utils/spotifyAuth';
 import { searchSongs } from './utils/spotifySearch';
+import { getChallengeSong } from './utils/getChallengeSong';
+import ChallengeBanner from './components/ChallengeBanner';
 
 
 
@@ -26,6 +28,7 @@ function App() {
   const sourceRef = useRef(null);
   const detectedPitchesRef = useRef([]);
   const [selectedGenre, setSelectedGenre] = useState('');
+  const [challengeSong, setChallengeSong] = useState(null);
 
   const handleStart = () => {
     startRecording({
@@ -80,9 +83,16 @@ function App() {
       const token = await getAccessToken();
       const tag = rangeToTag(vocalRange); // use range mapping in function
       const query = `${tag} ${selectedGenre}`.trim();
-      const results = await searchSongs(query, token);
-      setRecommended(results);
+      const recs = await searchSongs(query, token);
+      setRecommended(recs);
 
+      // pull challenge track
+      const challenger = await getChallengeSong({ // call method, async function so await to pause until it finished Spotify fetch logic
+        rangeTag: tag, 
+        genre: selectedGenre,
+        token // OAuth access token
+      });
+      setChallengeSong(challenger) // returned track object is stored in 'challenger' so it can be immediately passed or rendered
     };
   
     fetchSpotifySongs();
@@ -104,6 +114,8 @@ function App() {
 
       <GenreSelect value={selectedGenre} onChange={setSelectedGenre} />
 
+      <ChallengeBanner track = {challengeSong} />
+
       {vocalRange && (
         <div className="mt-10 text-center space-y-4">
           <p className="text-lg font-semibold text-gray-700">Your Vocal Range:</p>
@@ -115,22 +127,22 @@ function App() {
       )}
 
       {recommended.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-10 max-w-2xl mx-auto">
+        <div className = "grid grid-cols-1 sm:grid-cols-2 gap-6 mt-10 max-w-2xl mx-auto">
           {recommended.map((track) => (
-            <div key={track.id} className="bg-white shadow p-4 rounded-lg">
-              <img src={track.album.images[0]?.url} alt={track.name} className="w-full rounded" />
-              <p className="font-semibold mt-2">{track.name}</p>
-              <p className="text-sm text-gray-500">{track.artists[0]?.name}</p>
+            <div key = {track.id} className="bg-white shadow p-4 rounded-lg">
+              <img src = {track.album.images[0]?.url} alt={track.name} className="w-full rounded" />
+              <p className = "font-semibold mt-2">{track.name}</p>
+              <p className = "text-sm text-gray-500">{track.artists[0]?.name}</p>
               {track.preview_url && (
                 <audio controls className="w-full mt-2">
-                  <source src={track.preview_url} type="audio/mpeg" />
+                  <source src = {track.preview_url} type="audio/mpeg" />
                 </audio>
               )}
               <a
-                href={track.external_urls.spotify}
-                target="_blank"
-                rel="noreferrer"
-                className="text-indigo-600 underline text-sm"
+                href = {track.external_urls.spotify}
+                target = "_blank"
+                rel = "noreferrer"
+                className = "text-indigo-600 underline text-sm"
               >
                 Open in Spotify
               </a>
