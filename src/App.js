@@ -30,6 +30,9 @@ function App() {
   const [selectedGenre, setSelectedGenre] = useState('');
   const [challengeSong, setChallengeSong] = useState(null);
 
+  const [playProgress, setPlayProgress] = useState(0)
+  const audioRef = useRef()
+
   const handleStart = () => {
     startRecording({
       mediaRecorderRef,
@@ -97,6 +100,22 @@ function App() {
   
     fetchSpotifySongs();
   }, [vocalRange, selectedGenre]);  
+
+  // hook up playhead progress whenever the audioURL (and thus <audio />) changes
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) {
+      return;
+    }
+    
+    const onTime = () => {
+      setPlayProgress(audio.currentTime / (audio.duration || 1));
+    };
+
+    audio.addEventListener('timeupdate', onTime);
+    return () => audio.removeEventListener('timeupdate', onTime);
+  }, [audioURL]);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-100 to-white flex flex-col items-center justify-center px-6 py-12">
