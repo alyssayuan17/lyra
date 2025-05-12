@@ -13,12 +13,21 @@ export function noteToMidi(note) {
         return null;
     }
     const noteNames = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-    const [, letter, octave] = note.match(/^([A-G]#?)(\d)$/) || [];
+    const match = note.match(/^([A-G]#?)(\d)$/);
+    if (!match) {
+        return null;
+    }
+    const [, letter, octaveStr] = match;
+    const octave = parseInt(octaveStr, 10); // converting the octave (string) into a number, in decimal base 10
     const index = noteNames.indexOf(letter);
     if (index === -1) { // -1 is returned when the letter is not found in the noteNames array
         return null; // return null because it wasn't a valid note name
     }
-    return index + 12 * (parseInt(octave, 10) + 1);
+    return index + (octave + 1)*12; // +1 to shift everything up; so note-to-MIDI math matches standard MIDI mapping
+}
+
+export function midiToKeyIndex(midi, baseMidi = 48 /*C3*/) {
+    return midi - baseMidi;
 }
 
 export function midiToNote(midi) {
