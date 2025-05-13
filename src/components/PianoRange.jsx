@@ -1,5 +1,5 @@
 import React from 'react'
-import { noteToMidi } from '../utils/noteUtils'
+import { noteToMidi, midiToKeyIndex } from '../utils/noteUtils'
 
 const WHITE_KEY_WIDTH = 20
 const WHITE_KEY_HEIGHT = 120
@@ -10,31 +10,35 @@ const TOTAL_KEYS = 12 * 2 // two octaves
 
 const isBlack = (m) => [1,3,6,8,10].includes(m % 12);
 
-export default function PianoRange({ low, high, playProgress = 0}) {
-    if (!low || !high) {
+export default function PianoRange({ lowNote, highNote, playProgress }) {
+    if (!lowNote || !highNote) {
         return null;
     }
-    const lowMidi  = noteToMidi(low)
-    const highMidi = noteToMidi(high)
+    
+    const lowMidi  = noteToMidi(lowNote);
+    const highMidi = noteToMidi(highNote);
+    const lowIdx   = midiToKeyIndex(lowMidi, BASE_MIDI);
+    const highIdx  = midiToKeyIndex(highMidi, BASE_MIDI);
 
     // build key data
     const keys = Array.from({ length: TOTAL_KEYS }, (_, i) => {
-        const midi = BASE_MIDI + i
+        const midi    = BASE_MIDI + i;
+        const isBlack = [1,3,6,8,10].includes(midi % 12);
         return {
-        midi,
-        x: i * WHITE_KEY_WIDTH,
-        black: isBlack(midi),
-        highlight: midi >= lowMidi && midi <= highMidi
-        }
-    })
+          midi,
+          isBlack,
+          highlight: i >= lowIdx && i <= highIdx,
+          x: i * WHITE_KEY_WIDTH
+        };
+    });
 
-    const svgWidth  = TOTAL_KEYS * WHITE_KEY_WIDTH
-    const svgHeight = WHITE_KEY_HEIGHT
+    const svgWidth  = TOTAL_KEYS * WHITE_KEY_WIDTH;
+    const svgHeight = WHITE_KEY_HEIGHT;
 
     return (
         <svg width={svgWidth} height={svgHeight}>
             {/* White keys */}
-            {keys.filter(k => !k.black).map(k => (
+            {keys.filter(k => !k.isBlack).map(k => (
                 <rect
                 key={k.midi}
                 x={k.x}
@@ -46,8 +50,8 @@ export default function PianoRange({ low, high, playProgress = 0}) {
                 />
             ))}
 
-            {/* Black keys (drawn after so they sit on top) */}
-            {keys.filter(k => k.black).map(k => (
+            {/* Black keys */}
+            {keys.filter(k => k.isBlack).map(k => (
                 <rect
                 key={k.midi}
                 x={k.x + WHITE_KEY_WIDTH - BLACK_KEY_WIDTH/2}
@@ -58,7 +62,7 @@ export default function PianoRange({ low, high, playProgress = 0}) {
                 />
             ))}
 
-            {/* Playhead line (0→1) */}
+            {/* Playhead */}
             <line
                 x1={playProgress * svgWidth}
                 y1={0}
@@ -68,5 +72,5 @@ export default function PianoRange({ low, high, playProgress = 0}) {
                 strokeWidth={2}
             />
         </svg>
-    )
+    );
 }
