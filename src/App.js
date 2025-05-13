@@ -143,20 +143,21 @@ function App() {
       <ChallengeBanner track = {challengeSong} />
 
       {vocalRange && (
-        <div className = "mt-10 text-center space-y-4">
-          <p className = "text-lg font-semibold text-gray-700">Your Vocal Range:</p>
-          <p className = "text-3xl font-bold text-indigo-700">
-            {vocalRange.low} – {vocalRange.high}
-          </p>
-          <HealthTip tip = {healthTip} />
-          <div className = "w-full overflow-x-auto">
-            <PianoRange 
-              lowNote = {vocalRange.low}
-              highNote = {vocalRange.high}
-              playProgress = {playProgress}
-            />
+        <>
+          {/* vocal range + health tip */}
+          <div className = "mt-10 text-center space-y-4">
+            <p className = "text-lg font-semibold text-gray-700">Your Vocal Range:</p>
+            <p className = "text-3xl font-bold text-indigo-700">
+              {vocalRange.low} – {vocalRange.high}
+            </p>
+            <HealthTip tip = {healthTip} />
           </div>
-        </div>
+
+          {/* piano keyboard in its own box (overflow visible) */}
+          <div className="mt-6 p-4 border border-gray-300 bg-white overflow-visible">
+            <PianoRange low={vocalRange.low} high={vocalRange.high} currentPitch={currentPitch} />
+          </div>
+        </>
       )}
 
       {recommended.length > 0 && (
