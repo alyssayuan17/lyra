@@ -16,6 +16,7 @@ export const startRecording = async ({
   setIsRecording,
   setAudioURL,
   recordingStartRef,
+  setCurrentPitch,
 }) => {
   recordingStartRef.current = performance.now();
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -42,11 +43,15 @@ export const startRecording = async ({
 
   processor.onaudioprocess = (event) => {
     const input = event.inputBuffer.getChannelData(0);
-    const rms = computeRMS(input);
+    const rms   = computeRMS(input);
     if (rms < ENERGY_THRESHOLD) return;
+
     const pitch = detect(input, sampleRate);
     if (pitch && pitch > 65 && pitch < 1200) {
       detectedPitchesRef.current.push(pitch);
+
+      // tell React about the very latest frame’s pitch
+      setCurrentPitch(pitch);
     }
   };
 

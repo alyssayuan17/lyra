@@ -34,6 +34,7 @@ function App() {
   const [playProgress, setPlayProgress] = useState(0); // for piano
   const audioRef = useRef(null);
   const recordingStartRef = useRef(0);
+  const [currentPitch, setCurrentPitch] = useState(null);
 
   const handleStart = () => {
     startRecording({
@@ -47,6 +48,7 @@ function App() {
       setAudioURL,
       setRecommended,
       recordingStartRef,
+      setCurrentPitch,
     });
   };
 
@@ -155,7 +157,12 @@ function App() {
 
           {/* piano keyboard in its own box (overflow visible) */}
           <div className="mt-6 p-4 border border-gray-300 bg-white overflow-visible">
-            <PianoRange low={vocalRange.low} high={vocalRange.high} currentPitch={currentPitch} />
+          <PianoRange
+            lowNote = {vocalRange.low}
+            highNote = {vocalRange.high}
+            currentPitch = {currentPitch}
+            playProgress = {playProgress}
+          />
           </div>
         </>
       )}

@@ -10,7 +10,7 @@ const TOTAL_KEYS = 12 * 2 // two octaves
 
 const isBlack = (m) => [1,3,6,8,10].includes(m % 12);
 
-export default function PianoRange({ lowNote, highNote, playProgress }) {
+export default function PianoRange({ lowNote, highNote, currentPitch, playProgress }) {
     if (!lowNote || !highNote) {
         return null;
     }
