@@ -2,15 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 @layer utilities {
-    .bg-gradient-to-b {
-        background-image: linear-gradient(to bottom, var(--tw-gradient-stops));
-      }
-      .from-indigo-100 {
-        --tw-gradient-from: #E0E7FF;
-        --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
-      }
-      .to-white {
-        --tw-gradient-to: #ffffff;
-      }
+  .bg-gradient-to-b {
+    background-image: linear-gradient(to bottom, var(--tw-gradient-stops));
+  }
+  .from-indigo-100 {
+    --tw-gradient-from: #E0E7FF;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+  .to-white {
+    --tw-gradient-to: #ffffff;
+  }
+      
 }
-  

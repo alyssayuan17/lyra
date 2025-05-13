@@ -156,13 +156,13 @@ function App() {
           </div>
 
           {/* piano keyboard in its own box (overflow visible) */}
-          <div className="mt-6 p-4 border border-gray-300 bg-white overflow-visible">
-          <PianoRange
-            lowNote = {vocalRange.low}
-            highNote = {vocalRange.high}
-            currentPitch = {currentPitch}
-            playProgress = {playProgress}
-          />
+          <div className="piano-container overflow-hidden w-[600px] h-[120px] mx-auto mt-4 border bg-white">
+            <PianoRange
+              lowNote = {vocalRange.low}
+              highNote = {vocalRange.high}
+              currentPitch = {currentPitch}
+              playProgress = {playProgress}
+            />
           </div>
         </>
       )}
