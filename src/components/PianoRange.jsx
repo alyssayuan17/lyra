@@ -36,40 +36,40 @@ export default function PianoRange({ lowNote, highNote, playProgress }) {
     const svgHeight = WHITE_KEY_HEIGHT;
 
     return (
-        <svg width={svgWidth} height={svgHeight}>
-            {/* White keys */}
+        <svg width = {svgWidth} height = {svgHeight}>
+            {/* white keys */}
             {keys.filter(k => !k.isBlack).map(k => (
                 <rect
-                key={k.midi}
-                x={k.x}
-                y={0}
-                width={WHITE_KEY_WIDTH}
-                height={WHITE_KEY_HEIGHT}
-                fill={k.highlight ? '#a78bfa' : '#ffffff'}
-                stroke="#333"
+                key = {k.midi}
+                x = {k.x}
+                y = {0}
+                width = {WHITE_KEY_WIDTH}
+                height = {WHITE_KEY_HEIGHT}
+                fill = {k.highlight ? '#a78bfa' : '#ffffff'}
+                stroke = "#333"
                 />
             ))}
 
-            {/* Black keys */}
+            {/* black keys */}
             {keys.filter(k => k.isBlack).map(k => (
                 <rect
-                key={k.midi}
-                x={k.x + WHITE_KEY_WIDTH - BLACK_KEY_WIDTH/2}
-                y={0}
-                width={BLACK_KEY_WIDTH}
-                height={BLACK_KEY_HEIGHT}
-                fill={k.highlight ? '#7c3aed' : '#000000'}
+                key = {k.midi}
+                x = {k.x + WHITE_KEY_WIDTH - BLACK_KEY_WIDTH/2}
+                y = {0}
+                width = {BLACK_KEY_WIDTH}
+                height = {BLACK_KEY_HEIGHT}
+                fill = {k.highlight ? '#7c3aed' : '#000000'}
                 />
             ))}
 
-            {/* Playhead */}
+            {/* playhead */}
             <line
-                x1={playProgress * svgWidth}
-                y1={0}
-                x2={playProgress * svgWidth}
-                y2={svgHeight}
-                stroke="red"
-                strokeWidth={2}
+                x1 = {playProgress * svgWidth}
+                y1 = {0}
+                x2 = {playProgress * svgWidth}
+                y2 = {svgHeight}
+                stroke = "red"
+                strokeWidth = {2}
             />
         </svg>
     );

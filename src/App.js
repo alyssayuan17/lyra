@@ -33,6 +33,7 @@ function App() {
 
   const [playProgress, setPlayProgress] = useState(0); // for piano
   const audioRef = useRef(null);
+  const recordingStartRef = useRef(0);
 
   const handleStart = () => {
     startRecording({
@@ -45,6 +46,7 @@ function App() {
       setIsRecording,
       setAudioURL,
       setRecommended,
+      recordingStartRef,
     });
   };
 
@@ -59,6 +61,7 @@ function App() {
       setVocalRange,
       setHealthTip,
       setRecommended,
+      recordingStartRef,
     });
   };
 
@@ -122,7 +125,7 @@ function App() {
 
 
   return (
-    <div className = "min-h-screen bg-gradient-to-b from-indigo-100 to-white flex flex-col items-center justify-center px-6 py-12">
+    <div className = "min-h-screen bg-gradient-to-b from-[#FEF9C3] to-white flex flex-col items-center justify-center px-6 py-12">
       <h1 className = "text-4xl sm:text-5xl font-extrabold font-poppins text-indigo-800 mb-8 tracking-tight drop-shadow">
         Lyra <span role = "img" aria-label="mic"></span>
       </h1>
@@ -146,11 +149,13 @@ function App() {
             {vocalRange.low} – {vocalRange.high}
           </p>
           <HealthTip tip = {healthTip} />
-          <PianoRange 
-            lowNote = {vocalRange.low}
-            highNote = {vocalRange.high}
-            playProgress = {playProgress}
-          />
+          <div className = "w-full overflow-x-auto">
+            <PianoRange 
+              lowNote = {vocalRange.low}
+              highNote = {vocalRange.high}
+              playProgress = {playProgress}
+            />
+          </div>
         </div>
       )}
 

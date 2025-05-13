@@ -15,7 +15,9 @@ export const startRecording = async ({
   detectedPitchesRef,
   setIsRecording,
   setAudioURL,
+  recordingStartRef,
 }) => {
+  recordingStartRef.current = performance.now();
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
   mediaRecorderRef.current = new MediaRecorder(stream);
@@ -68,9 +70,13 @@ export const stopRecording = async ({
   setVocalRange,
   setHealthTip,
   setRecommended,
+  recordingStartRef,
 }) => {
   mediaRecorderRef.current?.stop();
   setIsRecording(false);
+
+  const totalMs = performance.now() - recordingStartRef.current; // computer total recording time
+  const totalSec = totalMs / 1000;
 
   try {
     processorRef.current?.disconnect();
@@ -81,6 +87,10 @@ export const stopRecording = async ({
   }
 
   const pitches = detectedPitchesRef.current || [];
+
+  const sampleDuration = totalSec / pitches.length;
+
+  console.log(`Each pitch sample represents ~${sampleDuration.toFixed(3)}s of audio`);
 
   if (pitches.length === 0) {
     setVocalRange({ low: "N/A", high: "N/A" });
