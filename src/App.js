@@ -11,6 +11,7 @@ import { getAccessToken } from './utils/spotifyAuth';
 import { searchSongs } from './utils/spotifySearch';
 import { getChallengeSong } from './utils/getChallengeSong';
 import ChallengeBanner from './components/ChallengeBanner';
+import PianoRange from './components/PianoRange';
 
 
 
@@ -30,8 +31,8 @@ function App() {
   const [selectedGenre, setSelectedGenre] = useState('');
   const [challengeSong, setChallengeSong] = useState(null);
 
-  const [playProgress, setPlayProgress] = useState(0)
-  const audioRef = useRef()
+  const [playProgress, setPlayProgress] = useState(0); // for piano
+  const audioRef = useRef(null);
 
   const handleStart = () => {
     startRecording({
@@ -102,46 +103,54 @@ function App() {
   }, [vocalRange, selectedGenre]);  
 
   // hook up playhead progress whenever the audioURL (and thus <audio />) changes
-  useEffect(() => {
+  useEffect(() => { // track playback
     const audio = audioRef.current;
     if (!audio) {
       return;
     }
-    
-    const onTime = () => {
-      setPlayProgress(audio.currentTime / (audio.duration || 1));
+
+    const onTime = () => { // runs every time audio's playback position changes
+      setPlayProgress(audio.currentTime / (audio.duration || 1)); // compute a normalized progress value
     };
 
-    audio.addEventListener('timeupdate', onTime);
-    return () => audio.removeEventListener('timeupdate', onTime);
-  }, [audioURL]);
+    audio.addEventListener('timeupdate', onTime); // subscribe when effect runs
+
+    return () => { // unsubscribe when the component unmounts or audioURL changes
+      audio.removeEventListener('timeupdate', onTime);
+    }
+  }, [audioURL]); // re-attach whenever the source URL changes
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-indigo-100 to-white flex flex-col items-center justify-center px-6 py-12">
-      <h1 className="text-4xl sm:text-5xl font-extrabold font-poppins text-indigo-800 mb-8 tracking-tight drop-shadow">
-        Lyra <span role="img" aria-label="mic">🎙️</span>
+    <div className = "min-h-screen bg-gradient-to-b from-indigo-100 to-white flex flex-col items-center justify-center px-6 py-12">
+      <h1 className = "text-4xl sm:text-5xl font-extrabold font-poppins text-indigo-800 mb-8 tracking-tight drop-shadow">
+        Lyra <span role = "img" aria-label="mic"></span>
       </h1>
 
       <RecordingControls
-        isRecording={isRecording}
-        startRecording={handleStart}
-        stopRecording={handleStop}
+        isRecording = {isRecording}
+        startRecording = {handleStart}
+        stopRecording = {handleStop}
       />
 
-      <PlaybackPanel audioURL={audioURL} />
+      <PlaybackPanel audioURL = {audioURL} audioRef = {audioRef} />
 
-      <GenreSelect value={selectedGenre} onChange={setSelectedGenre} />
+      <GenreSelect value = {selectedGenre} onChange = {setSelectedGenre} />
 
       <ChallengeBanner track = {challengeSong} />
 
       {vocalRange && (
-        <div className="mt-10 text-center space-y-4">
-          <p className="text-lg font-semibold text-gray-700">Your Vocal Range:</p>
-          <p className="text-3xl font-bold text-indigo-700">
+        <div className = "mt-10 text-center space-y-4">
+          <p className = "text-lg font-semibold text-gray-700">Your Vocal Range:</p>
+          <p className = "text-3xl font-bold text-indigo-700">
             {vocalRange.low} – {vocalRange.high}
           </p>
-          <HealthTip tip={healthTip} />
+          <HealthTip tip = {healthTip} />
+          <PianoRange 
+            lowNote = {vocalRange.low}
+            highNote = {vocalRange.high}
+            playProgress = {playProgress}
+          />
         </div>
       )}
 
