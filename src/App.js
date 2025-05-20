@@ -12,6 +12,7 @@ import { searchSongs } from './utils/spotifySearch';
 import { getChallengeSong } from './utils/getChallengeSong';
 import ChallengeBanner from './components/ChallengeBanner';
 import PianoRange from './components/PianoRange';
+import VoiceTypeBadge from './components/VoiceTypeBadge';
 
 
 
@@ -153,6 +154,7 @@ function App() {
               {vocalRange.low} – {vocalRange.high}
             </p>
             <HealthTip tip = {healthTip} />
+            <VoiceTypeBadge vocalRange = {vocalRange} />
           </div>
 
           {/* piano keyboard in its own box (overflow visible) */}
