@@ -12,7 +12,10 @@ import { searchSongs } from './utils/spotifySearch';
 import { getChallengeSong } from './utils/getChallengeSong';
 import ChallengeBanner from './components/ChallengeBanner';
 import PianoRange from './components/PianoRange';
+
 import VoiceTypeBadge from './components/VoiceTypeBadge';
+import { suggestGenres } from './utils/genreSuggest';
+import GenreSuggestions from './components/GenreSuggestions';
 
 
 
@@ -20,6 +23,7 @@ function App() {
   const [isRecording, setIsRecording] = useState(false);
   const [audioURL, setAudioURL] = useState("");
   const [vocalRange, setVocalRange] = useState(null);
+  const [autoGenres, setAutoGenres] = useState([]);
   const [healthTip, setHealthTip] = useState("");
   const [recommended, setRecommended] = useState([]);
 
@@ -65,6 +69,10 @@ function App() {
       setHealthTip,
       setRecommended,
       recordingStartRef,
+      
+      onComplete: (finalRange) => {
+        setAutoGenres(suggestGenres(finalRange))
+      }
     });
   };
 
@@ -154,6 +162,7 @@ function App() {
               {vocalRange.low} – {vocalRange.high}
             </p>
             <HealthTip tip = {healthTip} />
+            <GenreSuggestions genres={autoGenres} />
             <VoiceTypeBadge vocalRange = {vocalRange} />
           </div>
 
