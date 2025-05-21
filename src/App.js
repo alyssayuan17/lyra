@@ -69,12 +69,15 @@ function App() {
       setHealthTip,
       setRecommended,
       recordingStartRef,
-      
-      onComplete: (finalRange) => {
-        setAutoGenres(suggestGenres(finalRange))
-      }
     });
   };
+
+  useEffect(() => { // whenever vocalRange changes, compute suggestions
+    if (!vocalRange) {
+      return;
+    }
+    setAutoGenres(suggestGenres(vocalRange));
+  }, [vocalRange]);
 
   const rangeToTag = (vocalRange) => { // mapping: match the user’s range to a tagged song category
     if (!vocalRange || !vocalRange.low || !vocalRange.high) { // check if it is null, check if low/high is missing
