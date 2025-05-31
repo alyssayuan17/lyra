@@ -41,9 +41,9 @@ function App() {
   const recordingStartRef = useRef(0);
   const [currentPitch, setCurrentPitch] = useState(null);
 
-  const handleStart = () => {
-    startRecording({
-      mediaRecorderRef,
+  const handleStart = () => { 
+    startRecording({ // when user hits 'start recording', it calls this function + hands it a single object with refs & state-updaters
+      mediaRecorderRef, // React ref for MediaRecorder
       chunks,
       audioContextRef,
       sourceRef,
@@ -165,7 +165,7 @@ function App() {
               {vocalRange.low} – {vocalRange.high}
             </p>
             <HealthTip tip = {healthTip} />
-            <GenreSuggestions genres={autoGenres} />
+            <GenreSuggestions genres = {autoGenres} />
             <VoiceTypeBadge vocalRange = {vocalRange} />
           </div>
 

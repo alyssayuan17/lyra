@@ -6,17 +6,16 @@ export default function GenreSuggestions({ genres }) {
     }
 
     return (
-        <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600 mb-1">Suggested genres for you:</p>
-            <div className="inline-flex flex-wrap gap-2">
-                {genres.map((g) => (
-                <span
-                    key={g}
-                    className="px-3 py-1 bg-indigo-100 text-indigo-800 text-xs rounded-full"
-                >
-                    {g}
-                </span>
-                ))}
+        <div className = "mt-6 text-center">
+            <p className = "text-sm text-gray-600 mb-1">Suggested genres for you:</p>
+            <div className = "inline-flex flex-wrap gap-2">
+                <ul className = "gap-2 justify-center">
+                    {genres.map((genre, index) => (
+                        <li key = {index} className="px-3 py-1 bg-gray-200 rounded-full text-sm">
+                            {genre.split(" ").map(w => w[0].toUpperCase() + w.slice(1)).join(" ")}
+                        </li>
+                    ))}
+                </ul>
             </div>
         </div>
     )
