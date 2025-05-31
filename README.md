@@ -1,70 +1,125 @@
-# Getting Started with Create React App
+# Lyra – Personalized Vocal Range Analyzer & Song Recommender 🎤 🎵
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Lyra is a web app that helps singers explore their vocal range and discover songs that actually suit their voice. It analyzes your range in real time, then recommends songs based on your genre preferences and how much you're looking to challenge yourself!
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## Live Demo! 🚀 
 
-### `npm start`
+🔗 [Try Lyra here](#) *(link coming soon!)*
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Why I Built This! 😊
 
-### `npm test`
+As a classically trained singer who’s struggled with vocal fatigue and finding the right songs, I built Lyra to make vocal exploration fun, personalized, and accessible! Lyra is a mix of my passion for music and my love for building things with code!
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## What Lyra Does...
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Record Your Voice 🎙️  
+- Start and stop recording directly from your browser
+- Captures microphone input to analyze your singing
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Play It Back 🔁 
+- Replay your recorded audio to self-assess and compare
+- Simple UI with play/pause functionality
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Detect Your Vocal Range 📈 
+- Automatically detects the lowest and highest pitch in your voice
+- Displays results in both note format (e.g., C3 - G5) and MIDI
 
-### `npm run eject`
+### See It on a Piano 🎹
+- Interactive piano keyboard displays your vocal range visually
+- Great for visual learners and singers trained on piano
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Know Your Voice Type 🎧
+- Labels your voice type (i.e. Soprano, Alto, Tenor, Bass)
+- Helps you understand which parts and genres suit your voice
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Choose a Genre 🎼  
+- Pick a genre you love — pop, R&B, musical theatre, etc.! 
+- Lyra uses it to customize your recommendations! 😉
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Get Spotify-Powered Suggestions 🎶
+- Finds songs within your range and preferred genre using Spotify's API
+- Filters tracks based on vocal accessibility and pitch window
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Try a “Challenge Song” 🔥
+- Suggests a challenging high-note song just outside your comfort zone
+- Helps stretch your vocal capacity gradually - helps to build confidence as a singer!
 
-## Learn More
+### Health Tips for Singers! 💡
+- Rotating tips on vocal warmups, hydration, and posture
+- Shares tips to keep your voice healthy while practicing
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Genre Suggestions by Voice Type 💡
+- Recommends genres that best match your range and voice type
+- Helps users explore new musical styles confidently!
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
 
-### Code Splitting
+## Tech Stack 🛠️ 
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+- **React** with Hooks  
+- **TailwindCSS**  
+- **Audio**: Web Audio API (for pitch and frequency analysis), custom pitch analysis utilities
+- **Auth + API**: Spotify OAuth, Spotify Web API (for song search)
+- **Custom Modules**: `noteUtils`, `audioUtils`, `recordingLogic`
 
-### Analyzing the Bundle Size
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## File Structure 📁 
 
-### Making a Progressive Web App
+```
+src/
+├── assets/
+│   └── logo.svg
+├── components/
+│   ├── ChallengeBanner.jsx
+│   ├── GenreSelect.jsx
+│   ├── GenreSuggestions.jsx
+│   ├── HealthTip.jsx
+│   ├── PianoRange.jsx
+│   ├── PlaybackPanel.jsx
+│   ├── RecordingControls.jsx
+│   ├── SongRecCard.jsx
+│   └── VoiceTypeBadge.jsx
+├── data/
+│   └── songs.js
+├── styles/
+│   ├── App.css
+│   └── index.css
+├── utils/
+│   ├── audioUtils.js
+│   ├── fallbackChallenges.json
+│   ├── genreSuggest.js
+│   ├── getChallengeSong.js
+│   ├── matchSongs.js
+│   ├── noteUtils.js
+│   ├── pitchUtils.js
+│   ├── recordingLogic.js
+│   ├── spotifyAuth.js
+│   └── spotifySearch.js
+├── App.js
+├── App.test.js
+├── index.js
+└── reportWebVitals.js
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+---
 
-### Advanced Configuration
+## What I Might Add Next! (open to any feedback/suggestions 😁)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+- Real-time pitch graph
+- Vocal journaling and logs
+- Key transposition option? Different octaves? 
+- Male/female voice differentiation? (might be challenging)
+- Sharper genre-based warmup suggestions?
 
-### Deployment
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## Contributions
 
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Open to suggestions! Feel free to message if you have ideas 😁
