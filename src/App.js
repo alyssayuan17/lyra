@@ -4,7 +4,6 @@ import PlaybackPanel from './components/PlaybackPanel';
 import HealthTip from './components/HealthTip';
 import GenreSelect from './components/GenreSelect';
 import { startRecording, stopRecording } from "./utils/recordingLogic";
-
 import { computeRMS, getMidi } from './utils/audioUtils';
 import { noteFromPitch } from './utils/noteUtils';
 import { getAccessToken } from './utils/spotifyAuth';
@@ -12,7 +11,6 @@ import { searchSongs } from './utils/spotifySearch';
 import { getChallengeSong } from './utils/getChallengeSong';
 import ChallengeBanner from './components/ChallengeBanner';
 import PianoRange from './components/PianoRange';
-
 import VoiceTypeBadge from './components/VoiceTypeBadge';
 import { suggestGenres } from './utils/genreSuggest';
 import GenreSuggestions from './components/GenreSuggestions';
@@ -58,6 +56,13 @@ function App() {
   };
 
   const handleStop = () => {
+    // calculate how long user recorded for
+    const durationMs = Date.now() - recordingStartRef.current;
+    if (durationMs < 800) { // check if recording is too short to avoid program crash
+      alert("Recording was too short, please sing for at least one second.");
+      return;
+    }
+
     stopRecording({
       mediaRecorderRef,
       audioContextRef,
@@ -101,22 +106,40 @@ function App() {
 
   useEffect(() => {
     const fetchSpotifySongs = async () => {
-      const token = await getAccessToken();
-      const tag = rangeToTag(vocalRange); // use range mapping in function
-      const query = `${tag} ${selectedGenre}`.trim();
-      const recs = await searchSongs(query, token);
-      setRecommended(recs);
+      try { // try-catch to avoid program crash if recording is too short
+        const token = await getAccessToken();
+        const tag = rangeToTag(vocalRange); // use range mapping in function
+        const query = `${tag} ${selectedGenre}`.trim();
+        const recs = await searchSongs(query, token);
+        setRecommended(recs);
 
-      // pull challenge track
-      const challenger = await getChallengeSong({ // call method, async function so await to pause until it finished Spotify fetch logic
-        rangeTag: tag, 
-        genre: selectedGenre,
-        token // OAuth access token
-      });
-      setChallengeSong(challenger) // returned track object is stored in 'challenger' so it can be immediately passed or rendered
+        // pull challenge track
+        const challenger = await getChallengeSong({ // call method, async function so await to pause until it finished Spotify fetch logic
+          rangeTag: tag, 
+          genre: selectedGenre,
+          token // OAuth access token
+        });
+        setChallengeSong(challenger) // returned track object is stored in 'challenger' so it can be immediately passed or rendered
+      } catch (error) {
+        console.error("Error fetching Spotify songs:", error);
+        // check if it is truly a "failed to fetch" error (due to network/internet connection)
+        if (error.message.includes("Failed to fetch")) {
+          alert("Couldn’t reach Spotify. Please check your network or try again later.");
+        } else {
+          alert("Something went wrong: " + error.message);
+        }
+      }
+
+      // reset recommendations so program does not render stale data
+      setRecommended([]);
+      setChallengeSong(null);
+      
     };
-  
-    fetchSpotifySongs();
+
+    if (vocalRange) { // only call if detected range is not null
+      fetchSpotifySongs();
+    }
+
   }, [vocalRange, selectedGenre]);  
 
   // hook up playhead progress whenever the audioURL (and thus <audio />) changes

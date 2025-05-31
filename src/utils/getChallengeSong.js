@@ -24,4 +24,4 @@ export async function getChallengeSong({ rangeTag, genre, token }) {
         headers: {Authorization: `Bearer ${token}` }
     });
     return await r.json();
-}
+} 

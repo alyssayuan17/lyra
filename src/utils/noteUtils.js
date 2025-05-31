@@ -33,6 +33,6 @@ export function midiToKeyIndex(midi, baseMidi = 48 /*C3*/) {
 export function midiToNote(midi) {
     const noteNames = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
     const note = noteNames[midi % 12];
-    const oct  = Math.floor(midi / 12) - 1;
+    const oct = Math.floor(midi / 12) - 1; // logic for calculating octave
     return note + oct;
 }
