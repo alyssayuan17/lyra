@@ -24,7 +24,6 @@ function App() {
   const [autoGenres, setAutoGenres] = useState([]);
   const [healthTip, setHealthTip] = useState("");
   const [recommended, setRecommended] = useState([]);
-
   const mediaRecorderRef = useRef(null);
   const chunks = useRef([]);
   const audioContextRef = useRef(null);
@@ -33,7 +32,6 @@ function App() {
   const detectedPitchesRef = useRef([]);
   const [selectedGenre, setSelectedGenre] = useState('');
   const [challengeSong, setChallengeSong] = useState(null);
-
   const [playProgress, setPlayProgress] = useState(0); // for piano
   const audioRef = useRef(null);
   const recordingStartRef = useRef(0);
@@ -104,7 +102,39 @@ function App() {
     return "vocal warm up"; // if none matches, return this
   };  
 
+  useEffect(() => { // when page loads, vocalRange is null, so call this effect instead
+    // so user can see default recommendations immediately
+    (async () => { 
+      try{
+        const token = await getAccessToken();
+
+        // tag for "default" recommendations
+        const defaultTag = "general vocal";
+        const defaultQuery = defaultTag;
+        const defaultRecs = await searchSongs(defaultQuery, token);
+        setRecommended(defaultRecs);
+
+        const defaultChallenge = await getChallengeSong({
+          rangeTag: defaultTag,
+          genre: "", // no genre yet
+          token
+        });
+
+        setChallengeSong(defaultChallenge);
+      } catch (error) {
+        console.error("Error loading default Spotify recommendations: " + error);
+        setRecommended([]);
+        setChallengeSong(null);
+      }
+    })()
+  }, []);
+
   useEffect(() => {
+
+    if (!vocalRange) { // if vocalRange is null, don’t run the “range-based” fetch
+      return;
+    }
+
     const fetchSpotifySongs = async () => {
       try { // try-catch to avoid program crash if recording is too short
         const token = await getAccessToken();
@@ -135,7 +165,7 @@ function App() {
     };
 
     fetchSpotifySongs();
-    
+
   }, [vocalRange, selectedGenre]);  
 
   // hook up playhead progress whenever the audioURL (and thus <audio />) changes
