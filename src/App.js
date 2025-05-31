@@ -117,11 +117,13 @@ function App() {
         const challenger = await getChallengeSong({ // call method, async function so await to pause until it finished Spotify fetch logic
           rangeTag: tag, 
           genre: selectedGenre,
-          token // OAuth access token
+          token, // OAuth access token
         });
-        setChallengeSong(challenger) // returned track object is stored in 'challenger' so it can be immediately passed or rendered
+        setChallengeSong(challenger); // returned track object is stored in 'challenger' so it can be immediately passed or rendered
       } catch (error) {
         console.error("Error fetching Spotify songs:", error);
+        setRecommended([]);
+        setChallengeSong(null);
         // check if it is truly a "failed to fetch" error (due to network/internet connection)
         if (error.message.includes("Failed to fetch")) {
           alert("Couldn’t reach Spotify. Please check your network or try again later.");
@@ -129,17 +131,11 @@ function App() {
           alert("Something went wrong: " + error.message);
         }
       }
-
-      // reset recommendations so program does not render stale data
-      setRecommended([]);
-      setChallengeSong(null);
       
     };
 
-    if (vocalRange) { // only call if detected range is not null
-      fetchSpotifySongs();
-    }
-
+    fetchSpotifySongs();
+    
   }, [vocalRange, selectedGenre]);  
 
   // hook up playhead progress whenever the audioURL (and thus <audio />) changes
