@@ -2,6 +2,8 @@
 
 Lyra is a web app that helps singers explore their vocal range and discover songs that actually suit their voice. It analyzes your range in real time, then recommends songs based on your genre preferences and how much you're looking to challenge yourself!
 
+Built using React + Web Audio API to record and analyze voice - mapped detected pitch to vocal ranges and queried Spotify Web API for matching songs!
+
 ---
 
 ## Live Demo! 🚀 
@@ -18,7 +20,7 @@ As a classically trained singer who’s struggled with vocal fatigue and finding
 
 ## What Lyra Does...
 
-### Record Your Voice 🎙️  
+### Record Your Voice 🎙
 - Start and stop recording directly from your browser
 - Captures microphone input to analyze your singing
 
