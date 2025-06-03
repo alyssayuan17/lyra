@@ -200,9 +200,6 @@ function App() {
           />
         </div>
         <h1 className="text-4xl font-bold text-white mt-4">Welcome to Lyra</h1>
-        <button className="bg-yellow-500 text-black font-medium mt-6 px-6 py-2 rounded-md hover:bg-yellow-600 transition">
-          Start Recording
-        </button>
       </section>
 
       {/*features*/}
