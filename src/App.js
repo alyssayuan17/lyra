@@ -188,10 +188,51 @@ function App() {
 
 
   return (
-    <div className = "min-h-screen bg-gradient-to-b from-[#FEF9C3] to-white flex flex-col items-center justify-center px-6 py-12">
-      <h1 className = "text-4xl sm:text-5xl font-extrabold font-poppins text-indigo-800 mb-8 tracking-tight drop-shadow">
-        Lyra <span role = "img" aria-label="mic"></span>
-      </h1>
+    <div className="bg-black min-h-screen text-white font-sans">
+      <header className="text-yellow-500 text-3xl font-bold p-6 text-center">Lyra</header>
+      {/*top*/}
+      <section className="flex flex-col items-center justify-center px-4">
+        <div className="rounded-xl overflow-hidden shadow-lg max-w-3xl w-full">
+          <img
+            src="/assets/bkgimage.jpg"
+            alt="rose on sheet music"
+            className="w-full h-72 object-cover"
+          />
+        </div>
+        <h1 className="text-4xl font-bold text-white mt-4">Welcome to Lyra</h1>
+        <button className="bg-yellow-500 text-black font-medium mt-6 px-6 py-2 rounded-md hover:bg-yellow-600 transition">
+          Start Recording
+        </button>
+      </section>
+
+      {/*features*/}
+      <section className="mt-20 px-6 max-w-4xl mx-auto text-center">
+        <h2 className="text-3xl font-bold text-yellow-500 mb-4">Find Your Voice</h2>
+        <p className="text-neutral-300 text-base mb-10">
+          Your vocal range is unique — let Lyra help you find songs that truly resonate.
+        </p>
+
+        <div className="grid sm:grid-cols-2 gap-8 text-left">
+          <div className="flex items-start space-x-4">
+            <span className="text-yellow-500 text-3xl">🎤</span>
+            <div>
+              <h3 className="text-xl font-semibold text-yellow-400">Discover Your Vocal Range</h3>
+              <p className="text-sm text-neutral-300">
+                Automatically analyze your singing and identify your vocal range.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-start space-x-4">
+            <span className="text-yellow-500 text-3xl">🎵</span>
+            <div>
+              <h3 className="text-xl font-semibold text-yellow-400">Get Song Recommendations</h3>
+              <p className="text-sm text-neutral-300">
+                Receive personalized song suggestions based on your unique range.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <RecordingControls
         isRecording = {isRecording}
