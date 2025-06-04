@@ -257,7 +257,7 @@ function App() {
           </div>
 
           {/* piano keyboard in its own box (overflow visible) */}
-          <div className = "piano-container overflow-visible h-[120px] mx-auto mt-4 bg-white">
+          <div className = "piano-container overflow-visible h-[120px] mx-auto mt-4 bg-white flex justify-center items-center">
             <PianoRange
               lowNote = {vocalRange.low}
               highNote = {vocalRange.high}
