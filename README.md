@@ -1,4 +1,6 @@
-# Lyra – Personalized Vocal Range Analyzer & Song Recommender 🎤 🎵
+# Lyra – Personalized Vocal Range Analyzer & Song Recommender 
+
+<img width="991" alt="Screenshot 2025-06-12 at 2 20 28 AM" src="https://github.com/user-attachments/assets/201cd476-899f-4098-9468-0f8095da8b49" />
 
 Lyra is a web app that helps singers explore their vocal range and discover songs that actually suit their voice. It analyzes your range in real time, then recommends songs based on your genre preferences and how much you're looking to challenge yourself!
 
@@ -12,7 +14,7 @@ Built using React + Web Audio API to record and analyze voice - mapped detected 
 
 ---
 
-## Why I Built This! 😊
+## Why I Built This!
 
 As a classically trained singer who’s struggled with vocal fatigue and finding the right songs, I built Lyra to make vocal exploration fun, personalized, and accessible! Lyra is a mix of my passion for music and my love for building things with code!
 
@@ -36,7 +38,7 @@ Interactive piano keyboard displays your vocal range visually, great for visual 
 Labels your voice type (i.e. Soprano, Alto, Tenor, Bass), helps you understand which parts and genres suit your voice
 
 ### Choose a Genre:
-Pick a genre you love — pop, R&B, musical theatre, etc.! Lyra uses it to customize your recommendations! 😉
+Pick a genre you love — pop, R&B, musical theatre, etc.! Lyra uses it to customize your recommendations! 
 
 ### Get Spotify-Powered Suggestions:
 Finds songs within your range and preferred genre using Spotify's API, filters tracks based on vocal accessibility and pitch window
@@ -52,7 +54,7 @@ Recommends genres that best match your range and voice type, helps users explore
 
 ---
 
-## Tech Stack 🛠️
+## Tech Stack 
 
 - **React** with Hooks  
 - **TailwindCSS**  
