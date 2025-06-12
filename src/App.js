@@ -14,7 +14,8 @@ import PianoRange from './components/PianoRange';
 import VoiceTypeBadge from './components/VoiceTypeBadge';
 import { suggestGenres } from './utils/genreSuggest';
 import GenreSuggestions from './components/GenreSuggestions';
-import bkgimage from './assets/bkgimage.jpg'; // import image
+import lyraimage from './assets/lyraimage.png'; // import image
+import croppedimg from './assets/croppedimg.png';
 
 function App() {
   const [isRecording, setIsRecording] = useState(false);
@@ -193,7 +194,7 @@ function App() {
       <section className="flex flex-col items-center justify-center px-4">
         <div className="rounded-xl overflow-hidden shadow-lg max-w-3xl w-full">
           <img 
-            src={bkgimage}
+            src={croppedimg}
             alt="rose on sheet music"
             className="w-full max-w-md mx-auto"
           />
