@@ -1,4 +1,6 @@
-# Lyra – Personalized Vocal Range Analyzer & Song Recommender 🎤 🎵
+# Lyra – Personalized Vocal Range Analyzer & Song Recommender 
+
+<img width="991" alt="Screenshot 2025-06-12 at 2 20 28 AM" src="https://github.com/user-attachments/assets/201cd476-899f-4098-9468-0f8095da8b49" />
 
 Lyra is a web app that helps singers explore their vocal range and discover songs that actually suit their voice. It analyzes your range in real time, then recommends songs based on your genre preferences and how much you're looking to challenge yourself!
 
